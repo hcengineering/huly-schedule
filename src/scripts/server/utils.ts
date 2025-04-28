@@ -63,7 +63,7 @@ export async function makeContext(params: Record<string, string | undefined>): P
         }
       }
     )
-    console.log('SCHEDULE', schedule)
+    //console.log('SCHEDULE', schedule)
     if (schedule === undefined) {
       throw { status: 404, message: 'Schedule not found for ' + scheduleId }
     }
@@ -71,7 +71,7 @@ export async function makeContext(params: Record<string, string | undefined>): P
     const person = await client.findOne(contact.class.Person, {
       _id: schedule.owner
     })
-    console.log('PERSON', person)
+    //console.log('PERSON', person)
     if (person === undefined) {
       throw { status: 404, message: 'Person not found for ' + schedule.owner }
     }
@@ -86,10 +86,10 @@ export async function makeContext(params: Record<string, string | undefined>): P
       },
       { projection: { _id: 1 } }
     )
-    console.log('PERSON_SOCIAL_IDENTS', personSocialIdents)
+    //console.log('PERSON_SOCIAL_IDENTS', personSocialIdents)
 
     const personSocialIds = personSocialIdents.map((si) => si._id)
-    console.log('PERSON_SOCIAL_IDS', personSocialIds)
+    //console.log('PERSON_SOCIAL_IDS', personSocialIds)
 
     const calendars = await client.findAll(
       calendar.class.Calendar,
@@ -101,13 +101,13 @@ export async function makeContext(params: Record<string, string | undefined>): P
         projection: { _id: 1 }
       }
     )
-    console.log('ALL_CALENDARS', calendars)
+    //console.log('ALL_CALENDARS', calendars)
     if (calendars.length === 0) {
       throw { status: 404, message: 'Calendars not found for ' + person.personUuid }
     }
 
     const calendr = calendars.find((c) => c._id === (`${person.personUuid}_calendar` as Ref<Calendar>))
-    console.log('PERSON_CALENDAR', calendr)
+    //console.log('PERSON_CALENDAR', calendr)
     if (calendr === undefined) {
       throw { status: 404, message: 'Calendar not found for ' + person.personUuid }
     }
@@ -153,7 +153,7 @@ export async function makeContext(params: Record<string, string | undefined>): P
             }
           : undefined
     }
-    console.log('CONTEXT', context)
+    //console.log('CONTEXT', context)
 
     return context
   })
@@ -187,13 +187,13 @@ export async function getScheduleAndHost(
       } as any
     }
   )
-  console.log('SCHEDULE', schedule)
+  //console.log('SCHEDULE', schedule)
   if (schedule === undefined) {
     throw { status: 404, message: 'Schedule not found for' + scheduleId }
   }
 
   const hostPerson = await client.findOne(contact.class.Person, { _id: schedule.owner })
-  console.log('HOST_PERSON', hostPerson)
+  //console.log('HOST_PERSON', hostPerson)
   if (hostPerson === undefined) {
     throw { status: 404, message: 'Person not found for ' + schedule.owner }
   }
@@ -203,7 +203,7 @@ export async function getScheduleAndHost(
     attachedToClass: contact.class.Person,
     type: SocialIdType.EMAIL
   })
-  console.log('HOST_SOCIAL_ID', hostSocialId)
+  //console.log('HOST_SOCIAL_ID', hostSocialId)
   if (hostSocialId === undefined) {
     throw { status: 404, message: 'Email not found for ' + schedule.owner }
   }
@@ -225,7 +225,7 @@ export async function getEventAndGuest(
     calendar: calendarId as Ref<Calendar>,
     eventId: eventId
   })
-  console.log('EVENT', event)
+  //console.log('EVENT', event)
   if (event === undefined) {
     throw { status: 404, message: 'Event not found for ' + eventId }
   }
@@ -250,8 +250,8 @@ export async function getEventAndGuest(
     }
     participants.push({ person, email: socialId.value })
   }
-  console.log('GUEST_PERSON', guestPerson)
-  console.log('PARTICIPANTS', participants)
+  //console.log('GUEST_PERSON', guestPerson)
+  //console.log('PARTICIPANTS', participants)
   if (guestPerson === undefined) {
     throw { status: 404, message: 'Person not found for ' + guestEmail }
   }

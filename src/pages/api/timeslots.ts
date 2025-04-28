@@ -19,6 +19,11 @@ export async function loadEvents(
   periodEnd: Timestamp,
   personId: String
 ): Promise<Event[]> {
+  await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true)
+    }, 1000)
+  })
   const options: FindOptions<Event & ReccuringEvent & ReccuringInstance> = {
     projection: {
       eventId: 1,
@@ -84,7 +89,7 @@ export function isSlotBusy(events: Event[], slotStart: Timestamp, slotEnd: Times
 
 export const POST: APIRoute = async ({ locals, request }: APIContext) => {
   const req: TimeslotsRequest = await request.json()
-  console.log('GET_TIMESLOTS', req)
+  //console.log('GET_TIMESLOTS', req)
 
   const { workspaceUrl, scheduleId } = req
 

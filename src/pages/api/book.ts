@@ -44,10 +44,10 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
         req.booking.firstName,
         req.booking.lastName
       )
-      console.log('GUEST_PERSON_GLOBAL', guestPersonUuid, guestSocialId)
+      //console.log('GUEST_PERSON_GLOBAL', guestPersonUuid, guestSocialId)
 
       let guestPerson = await client.findOne(contact.class.Person, { personUuid: guestPersonUuid })
-      console.log('GUEST_PERSON', guestPerson)
+      //console.log('GUEST_PERSON', guestPerson)
       if (guestPerson === undefined) {
         const guestPersonId = await client.createDoc(contact.class.Person, contact.space.Contacts, {
           avatarType: AvatarType.COLOR,
@@ -55,7 +55,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
           personUuid: guestPersonUuid
         })
         guestPerson = await client.findOne(contact.class.Person, { _id: guestPersonId })
-        console.log('GUEST_PERSON_NEW', guestPerson)
+        //console.log('GUEST_PERSON_NEW', guestPerson)
         if (guestPerson === undefined) {
           throw { status: 500, message: 'Failed to create guest person' }
         }
@@ -106,13 +106,13 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
             projection: { _id: 1 }
           }
         )
-        console.log('HOST_OFFICE', hostOffice)
+        //console.log('HOST_OFFICE', hostOffice)
         if (hostOffice === undefined) {
           throw { status: 404, message: 'Office not found for person ' + hostPerson._id }
         }
         meetingRoomId = hostOffice._id
       } else {
-        console.log('MEETING_ROOM_ID', meetingRoomId)
+        //console.log('MEETING_ROOM_ID', meetingRoomId)
       }
 
       const eventId = generateEventId()
@@ -137,7 +137,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
         ),
         (slotStart - Date.now()) / 3_600_000 + inviteExpHours
       )
-      console.log('MEETING_LINK', meetingLink)
+      //console.log('MEETING_LINK', meetingLink)
 
       await client.addCollection<Event, Event>(
         calendar.class.Event,

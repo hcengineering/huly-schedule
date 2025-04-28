@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { fade } from 'svelte/transition'
+  import { quintOut } from 'svelte/easing'
   import Modal, { type Component, bind } from './Modal.svelte'
   import BookingForm from './BookingForm.svelte'
   import CancelationForm from './CancelationForm.svelte'
@@ -266,6 +268,11 @@
     </div>
     <span class="tz">{formatLocalTimezone()}</span>
   </div>
+  <div class="loader">
+    {#if loading}
+      <span class="progress" transition:fade={{ duration: 350, easing: quintOut }}></span>
+    {/if}
+  </div>
   <div class="schedule">
     <div class="month">
       <MonthView {context} {startDate} disabled={loading} onSelect={(date) => (startDate = date)} />
@@ -497,6 +504,35 @@
     h2 {
       font-size: 1rem;
       margin: 0.5rem 0 0 0;
+    }
+  }
+
+  .loader {
+    position: relative;
+
+    .progress {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -16px;
+      bottom: 12px;
+      display: inline-block;
+      background-color: var(--accent-alt-color);
+      background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.5) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.5) 75%, transparent 75%, transparent);
+      font-size: 30px;
+      background-size: 1em 1em;
+      box-sizing: border-box;
+      animation: barStripe 0.5s linear infinite;
+      border-radius: 2px;
+    }
+  }
+
+  @keyframes barStripe {
+    0% {
+      background-position: 1em 0;
+    }
+    100% {
+      background-position: 0 0;
     }
   }
 </style>
