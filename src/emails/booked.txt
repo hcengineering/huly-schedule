@@ -1,0 +1,34 @@
+{{header}}:
+{{scheduleTitle}}
+{{time}}
+
+Booked by:
+{{guestName}}
+{{guestEmail}}
+
+Organizer:
+{{hostName}}
+{{hostEmail}}
+
+Agenda:
+{{agenda}}
+
+{{#linkJoin}}
+Join meeting:
+{{linkJoin}}
+{{/linkJoin}}
+
+{{#linkReschedule}}
+Reschedule meeting:
+{{linkReschedule}}
+{{/linkReschedule}}
+
+{{#linkCancel}}
+Cancel meeting:
+{{linkCancel}}
+{{/linkCancel}}
+
+{{#linkBook}}
+Book another meeting:
+{{linkBook}}
+{{/linkBook}}

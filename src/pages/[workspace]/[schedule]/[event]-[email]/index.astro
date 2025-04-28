@@ -1,0 +1,15 @@
+---
+import MainLayout from '../../../../layouts/MainLayout.astro'
+import { makeContext } from '../../../../scripts/server/utils'
+import type { UIContext } from '../../../../scripts/types'
+
+let context: UIContext
+
+try {
+  context = await makeContext(Astro.params)
+} catch (err: any) {
+  return new Response(null, { status: err.status ?? 500 })
+}
+---
+
+<MainLayout {context} />

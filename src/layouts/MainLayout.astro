@@ -1,0 +1,87 @@
+---
+import '../styles/global.css'
+import ScheduleView from '../components/ScheduleView.svelte'
+import type { UIContext } from '../scripts/types'
+
+interface Props {
+  context: UIContext
+}
+
+const { context } = Astro.props
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Huly Schedule</title>
+  </head>
+  <body>
+    <header>
+      <div class="person">
+        <div class="identity">
+          <div class="avatar">{context.person.avatarName}</div>
+          <div class="name">{context.person.name}</div>
+        </div>
+      </div>
+      <div class="info">
+        <div class="title">{context.schedule.title}</div>
+        <div class="descr">{context.schedule.description}</div>
+      </div>
+    </header>
+    <ScheduleView client:load {context}/>
+  </body>
+</html>
+
+<style define:vars={{ avatarColor: context.person.avatarColor }}>
+  .person {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .identity {
+      display: flex;
+      align-items: center;
+
+      .avatar {
+        background-color: var(--avatarColor);
+        color: rgba(255, 255, 255, 0.8);
+        width: 2.5rem;
+        height: 2.5rem;
+        flex: 0 0 2.5rem;
+        border-radius: 20%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem;
+        margin-right: 1rem;
+        transform: rotate(90deg);
+      }
+
+      .name {
+        font-size: 1.7rem;
+        font-weight: bold;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .info {
+    margin-left: 2rem;
+    max-width: 50rem;
+    display: flex;
+    flex-direction: column;
+
+    .title {
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      height: 2.9rem;
+    }
+
+    .descr {
+      font-size: 0.87rem;
+    }
+  }
+</style>

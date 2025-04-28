@@ -1,0 +1,30 @@
+<html>
+  <body>
+    <h2>{{scheduleTitle}}</h2>
+
+    <h3>{{header}}</h3>
+    <p>{{time}}</p>
+
+    <h3>Booked by</h3>
+    <p><a href="mailto:{{guestEmail}}">{{guestName}}</a></p>
+
+    <h3>Organizer</h3>
+    <p><a href="mailto:{{hostEmail}}">{{hostName}}</a></p>
+
+    <h3>Agenda</h3>
+    <p>{{agenda}}</p>
+
+    {{#linkJoin}}
+      <p><a href="{{linkJoin}}">Join meeting</a></p>
+    {{/linkJoin}}
+    {{#linkReschedule}}
+      <p><a href="{{linkReschedule}}">Reschedule meeting</a></p>
+    {{/linkReschedule}}
+    {{#linkCancel}}
+      <p><a href="{{linkCancel}}">Cancel meeting</a></p>
+    {{/linkCancel}}
+    {{#linkBook}}
+      <p><a href="{{linkBook}}">Book another meeting</a></p>
+    {{/linkBook}}
+  </body>
+</html>

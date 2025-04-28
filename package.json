@@ -1,0 +1,31 @@
+{
+  "name": "schedule",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "astro build",
+    "build:docker": "docker build -t huly-schedule .",
+    "start": "astro build && PORT=8060 ACCOUNT_URL=http://localhost:3000 SMTP_URL=http://localhost:8097 node ./dist/server/entry.mjs",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.2.1",
+    "@astrojs/svelte": "^7.0.11",
+    "@hcengineering/account-client": "^0.7.88",
+    "@hcengineering/api-client": "^0.7.88",
+    "@hcengineering/calendar": "^0.7.88",
+    "@hcengineering/contact": "^0.7.88",
+    "@hcengineering/love": "^0.7.88",
+    "astro": "^5.7.5",
+    "ical-generator": "^8.1.1",
+    "jwt-simple": "^0.5.6",
+    "mustache": "^4.2.0",
+    "svelte": "^5.28.2",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@types/jwt-simple": "^0.5.6",
+    "@types/mustache": "^4.2.0",
+    "@types/node": "^22.15.2"
+  }
+}
