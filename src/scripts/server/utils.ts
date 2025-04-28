@@ -19,7 +19,7 @@ import contact, {
   getFirstName,
   getLastName
 } from '@hcengineering/contact'
-import { concatLink, SocialIdType, type Ref, type TxOperations } from '@hcengineering/core'
+import { concatLink, SocialIdType, type Projection, type Ref, type TxOperations } from '@hcengineering/core'
 import type { UIContext } from '../types'
 import { apiCall } from './api'
 import emailHtml from '../../emails/booked.html?raw'
@@ -172,13 +172,19 @@ export async function getScheduleAndHost(
   hostPerson: Person
   hostSocialId: SocialIdentity
 }> {
+  const projection: Projection<Schedule> = {
+    owner: 1, title: 1, timeZone: 1
+  }
   const schedule = await client.findOne(
     calendar.class.Schedule,
     {
       _id: scheduleId as Ref<Schedule>
     },
     {
-      projection: { owner: 1, title: 1, timeZone: 1 }
+      projection: {
+        ...projection,
+        'love:mixin:MeetingSchedule': 1
+      } as any
     }
   )
   console.log('SCHEDULE', schedule)
