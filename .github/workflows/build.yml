@@ -31,6 +31,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          context: .
           file: Dockerfile
           push: true
           tags: "ghcr.io/hcengineering/huly-schedule:${{ github.ref_name }}"
