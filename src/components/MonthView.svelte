@@ -1,4 +1,5 @@
 <script lang="ts">
+  import log from 'loglevel'
   import ShevronIcon from './ShevronIcon.svelte'
   import { sameDate } from '../scripts/client/utils'
   import { getTimeslots } from '../scripts/client/api'
@@ -82,7 +83,7 @@
       })
       .catch((err) => {
         loading = false
-        console.error('Failed to get timeslots for month', err);
+        log.error('Failed to get timeslots for month', err);
       })
   }
 

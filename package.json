@@ -5,7 +5,7 @@
   "scripts": {
     "build": "astro build",
     "build:docker": "docker build -t huly-schedule .",
-    "start": "astro build && PORT=8060 ACCOUNT_URL=http://localhost:3000 SMTP_URL=http://localhost:8097 node ./dist/server/entry.mjs",
+    "start": "astro build && PORT=8060 ACCOUNT_URL=http://localhost:3000 SMTP_URL=http://localhost:8097 LOG_LEVEL=trace node ./dist/server/entry.mjs",
     "astro": "astro"
   },
   "dependencies": {
@@ -19,6 +19,7 @@
     "astro": "^5.7.5",
     "ical-generator": "^8.1.1",
     "jwt-simple": "^0.5.6",
+    "loglevel": "^1.9.2",
     "mustache": "^4.2.0",
     "svelte": "^5.28.2",
     "typescript": "^5.8.3"

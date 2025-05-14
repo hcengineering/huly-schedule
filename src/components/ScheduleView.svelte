@@ -1,4 +1,5 @@
 <script lang="ts">
+  import log from 'loglevel'
   import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
   import { quintOut } from 'svelte/easing'
@@ -72,7 +73,7 @@
       })
       .catch((err) => {
         loading = false
-        console.error('Failed to get timeslots for week', err)
+        log.error('Failed to get timeslots for week', err)
       })
   }
 
@@ -183,7 +184,7 @@
         } else if (findPeriodTry > maxFindPeriodTry) {
           loading = false
           startDate = new Date()
-          console.error('Unable to find availble period')
+          log.error('Unable to find availble period')
         } else {
           findPeriodTry++
           const nextPeriod = new Date(periodStart)
@@ -195,7 +196,7 @@
       })
       .catch((err) => {
         loading = false
-        console.error('Failed to search next period', err)
+        log.error('Failed to search next period', err)
       })
   }
 
