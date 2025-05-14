@@ -10,6 +10,7 @@ import ical, {
 } from 'ical-generator'
 import log from 'loglevel'
 import Mustache from 'mustache'
+import type { AccountClient } from '@hcengineering/account-client'
 import type { RestClient } from '@hcengineering/api-client'
 import calendar, { type Calendar, type Event, type Schedule } from '@hcengineering/calendar'
 import contact, {
@@ -20,8 +21,9 @@ import contact, {
   getFirstName,
   getLastName
 } from '@hcengineering/contact'
-import { concatLink, SocialIdType, type Projection, type Ref, type TxOperations } from '@hcengineering/core'
-import type { UIContext } from '../types'
+import { AccountRole, concatLink, SocialIdType, type Projection, type Ref, type TxOperations } from '@hcengineering/core'
+import { loveId } from '@hcengineering/love'
+import type { Timestamp, UIContext } from '../types'
 import { apiCall } from './api'
 import emailHtml from '../../emails/booked.html?raw'
 import emailText from '../../emails/booked.txt?raw'
@@ -270,7 +272,8 @@ export function makeIcal(
   options?: {
     canceled?: boolean
     declined?: Ref<Person>
-    sequence?: number
+    sequence?: number,
+    location?: string,
   }
 ): string {
   const now = Date.now()
@@ -293,7 +296,7 @@ export function makeIcal(
         transparency: ICalEventTransparency.OPAQUE,
         class: ICalEventClass.PUBLIC,
         status: options?.canceled ? ICalEventStatus.CANCELLED : ICalEventStatus.CONFIRMED,
-        location: event.location ?? '',
+        location: options?.location ?? event.location ?? '',
         // Both Google and Outlook do not add event into calendar
         // if organizer is the same as the calendar owner.
         // It seems they consider the event must be already in the calendar
@@ -488,3 +491,51 @@ function extractTextFromMarkup(text: string | undefined): string {
   }
 }
 
+export async function getMeetingLinks({
+  accountClient,
+  workspaceUrl,
+  eventObjectId,
+  guestName,
+  guestEmail,
+  slotStart,
+}: {
+  accountClient: AccountClient,
+  workspaceUrl: string,
+  eventObjectId: Ref<Event>,
+  guestName: string,
+  guestEmail: string,
+  slotStart: Timestamp,
+}) : Promise<{ meetingLink: string, guestLink: string }> {
+  let inviteExpHours = parseFloat(process.env.INVITE_EXPIRATION_HOURS ?? '1')
+  if (isNaN(inviteExpHours) || inviteExpHours < 0) {
+    inviteExpHours = 1
+  }
+
+  const navigateUrl = encodeURIComponent(
+    JSON.stringify({
+      path: ['workbench', workspaceUrl, loveId],
+      query: { meetId: eventObjectId }
+    })
+  )
+
+  const inviteId = await accountClient.createInvite(-1, '', -1, AccountRole.Guest)
+  const meetingUrl = new URL(process.env.FRONT_URL ?? '')
+  meetingUrl.pathname = '/login/join'
+  meetingUrl.searchParams.set('inviteId', inviteId)
+  meetingUrl.searchParams.set('navigateUrl', navigateUrl)
+  const meetingLink = meetingUrl.toString()
+  log.debug('MEETING_LINK', meetingLink)
+
+  const guestLink = await accountClient.createInviteLink(
+    guestEmail,
+    AccountRole.Guest,
+    true,
+    getFirstName(guestName),
+    getLastName(guestName),
+    navigateUrl,
+    (slotStart - Date.now()) / 3_600_000 + inviteExpHours
+  )
+  log.debug('GUEST_LINK', guestLink)
+
+  return { meetingLink, guestLink }
+}

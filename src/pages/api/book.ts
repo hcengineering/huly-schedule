@@ -5,17 +5,22 @@ import calendar, { type Calendar, type Event, generateEventId } from '@hcenginee
 import {
   type Ref,
   type TxOperations,
-  AccountRole,
   SocialIdType,
   buildSocialIdString,
   generateId
 } from '@hcengineering/core'
 import contact, { type SocialIdentityRef, AvatarType, combineName, formatName } from '@hcengineering/contact'
-import love, { loveId } from '@hcengineering/love'
+import love from '@hcengineering/love'
 import type { BookingRequest } from '../../scripts/types'
 import { apiCallTx } from '../../scripts/server/api'
 import { loadEvents, isSlotBusy, getTimezoneOffset } from './timeslots'
-import { getScheduleAndHost, makeIcal, prepareEmailTemplateParams, sendEmail } from '../../scripts/server/utils'
+import {
+  getMeetingLinks,
+  getScheduleAndHost,
+  makeIcal,
+  prepareEmailTemplateParams,
+  sendEmail
+} from '../../scripts/server/utils'
 
 export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
   const req: BookingRequest = await request.json()
@@ -119,26 +124,14 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
       const eventId = generateEventId()
       const eventObjectId = generateId() as Ref<Event>
 
-      let inviteExpHours = parseFloat(process.env.INVITE_EXPIRATION_HOURS ?? '1')
-      if (isNaN(inviteExpHours) || inviteExpHours < 0) {
-        inviteExpHours = 1
-      }
-
-      const meetingLink = await accountClient.createInviteLink(
-        req.booking.email,
-        AccountRole.Guest,
-        true,
-        req.booking.firstName,
-        req.booking.lastName,
-        encodeURIComponent(
-          JSON.stringify({
-            path: ['workbench', wsInfo.workspaceUrl, loveId],
-            query: { meetId: eventObjectId }
-          })
-        ),
-        (slotStart - Date.now()) / 3_600_000 + inviteExpHours
-      )
-      log.debug('MEETING_LINK', meetingLink)
+      const { meetingLink, guestLink } = await getMeetingLinks({
+        accountClient,
+        workspaceUrl: wsInfo.workspaceUrl,
+        eventObjectId,
+        guestName: guestPerson.name,
+        guestEmail: req.booking.email,
+        slotStart,
+      })
 
       await client.addCollection<Event, Event>(
         calendar.class.Event,
@@ -204,7 +197,8 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
         }
       ]
 
-      const ical = makeIcal(schedule, event, guestPerson, participants)
+      const hostIcal = makeIcal(schedule, event, guestPerson, participants)
+      const guestIcal = makeIcal(schedule, event, guestPerson, participants, { location: guestLink })
 
       for (const p of participants) {
         const isGuest = p.person._id === guestPerson._id
@@ -216,14 +210,17 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
           hostPerson,
           hostSocialId.value,
           guestPerson,
-          req.booking.email
+          req.booking.email,
+          {
+            linkJoin: isGuest ? guestLink : meetingLink
+          }
         )
         // For testing with real calendar providers:
         const overrideTo = isGuest ? process.env.OVERRIDE_GUEST_EMAIL : process.env.OVERRIDE_HOST_EMAIL
-        await sendEmail( overrideTo ?? p.email, templateParams, ical)
+        await sendEmail( overrideTo ?? p.email, templateParams, isGuest ? guestIcal : hostIcal)
       }
 
-      return { eventId, ical }
+      return { eventId, ical: guestIcal }
     }
   )
   if (!res.ok) {
