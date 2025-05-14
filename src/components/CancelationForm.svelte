@@ -1,4 +1,5 @@
 <script lang="ts">
+  import log from 'loglevel'
   import Modal, { type Component, bind } from './Modal.svelte'
   import Confirmation from './Confirmation.svelte'
   import { formatLocalTimezone, formatTimeslot } from '../scripts/client/utils'
@@ -42,7 +43,7 @@
           })
           .catch((err) => {
             loading = false
-            console.error('Failed to book meeting', err)
+            log.error('Failed to book meeting', err)
           })
       }
     })

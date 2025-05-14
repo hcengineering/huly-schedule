@@ -1,5 +1,6 @@
-import calendar from '@hcengineering/calendar'
 import type { APIRoute, APIContext } from 'astro'
+import log from 'loglevel'
+import calendar from '@hcengineering/calendar'
 import type { CancelRequest } from '../../scripts/types'
 import { apiCallTx } from '../../scripts/server/api'
 import {
@@ -12,7 +13,7 @@ import {
 
 export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
   const req: CancelRequest = await request.json()
-  console.log('CANCEL', req)
+  log.info('CANCEL', req)
 
   const { workspaceUrl } = req
   const now = new Date()
@@ -85,7 +86,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
     }
   })
   if (!res.ok) {
-    console.log('Error while canceling meeting', req, res)
+    log.error('Error while canceling meeting', req, res)
     return new Response(JSON.stringify({ error: res.status }), {
       status: res.status,
       headers: { 'Content-Type': 'application/json' }

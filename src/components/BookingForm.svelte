@@ -1,4 +1,5 @@
 <script lang="ts">
+  import log from 'loglevel'
   import { formatLocalTimezone, formatTimeslot } from '../scripts/client/utils'
   import type { Timeslot, BookingInfo, UIContext } from '../scripts/types'
   import { bookMeeting } from '../scripts/client/api'
@@ -38,7 +39,7 @@
       })
       .catch((err) => {
         loading = false
-        console.error('Failed to book meeting', err)
+        log.error('Failed to book meeting', err)
       })
   }
 

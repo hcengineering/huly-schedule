@@ -1,4 +1,5 @@
 import type { APIRoute, APIContext } from 'astro'
+import log from 'loglevel'
 import calendar, { type Calendar } from '@hcengineering/calendar'
 import type { RescheduleRequest } from '../../scripts/types'
 import { apiCallTx } from '../../scripts/server/api'
@@ -14,7 +15,7 @@ import type { Ref } from '@hcengineering/core'
 
 export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
   const req: RescheduleRequest = await request.json()
-  console.log('RESCHEDULE', req)
+  log.info('RESCHEDULE', req)
 
   const { workspaceUrl } = req
   const now = new Date()
@@ -53,7 +54,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
       _id: event._id,
       calendar: req.calendarId as Ref<Calendar>
     })
-    //console.log('UPDATED_EVENT', updatedEvent)
+    log.debug('UPDATED_EVENT', updatedEvent)
     if (updatedEvent === undefined) {
       throw { status: 500, message: 'Updated event not retrieved' }
     }
@@ -80,7 +81,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
     return { ical }
   })
   if (!res.ok) {
-    console.log('Error while rescheduling meeting', req, res)
+    log.error('Error while rescheduling meeting', req, res)
     return new Response(JSON.stringify({ error: res.status }), {
       status: res.status,
       headers: { 'Content-Type': 'application/json' }

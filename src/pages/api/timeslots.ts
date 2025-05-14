@@ -56,7 +56,6 @@ export async function loadEvents(
     options
   )
   events1.push(...events2)
-  //console.log('EVENTS', calendar, events1)
   const events0 = events1.filter((ev) => ev.participants.includes(personId as Ref<Contact>))
   const events = getAllEvents(events0, periodStart, periodEnd)
   return events
@@ -89,8 +88,6 @@ export function isSlotBusy(events: Event[], slotStart: Timestamp, slotEnd: Times
 
 export const POST: APIRoute = async ({ locals, request }: APIContext) => {
   const req: TimeslotsRequest = await request.json()
-  //console.log('GET_TIMESLOTS', req)
-
   const { workspaceUrl, scheduleId } = req
 
   let periodStart = req.periodStart

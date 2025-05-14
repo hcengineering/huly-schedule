@@ -1,9 +1,6 @@
 import { encode } from 'jwt-simple'
-
-// import pkg from 'jwt-simple'
-// const { encode } = pkg
-
-import { type PersonUuid, type TxOperations, systemAccountUuid } from '@hcengineering/core'
+import log from 'loglevel'
+import { type TxOperations, systemAccountUuid } from '@hcengineering/core'
 import { type WorkspaceLoginInfo, getClient as getAccountClient } from '@hcengineering/account-client'
 import { type RestClient, createRestClient, createRestTxOperations } from '@hcengineering/api-client'
 
@@ -52,10 +49,10 @@ async function apiCallRaw<T>(ctx: ApiContext, handler: ApiHandler<T>): Promise<A
         process.env.SECRET ?? 'secret'
       )
       const client = getAccountClient(process.env.ACCOUNT_URL, token)
-      //console.log('Select workspace:', ctx.workspaceUrl)
+      log.debug('Select workspace:', ctx.workspaceUrl)
       wsInfo = await client.selectWorkspace(ctx.workspaceUrl)
       cachedWorkspaces.set(cacheKey, wsInfo)
-      //console.log(`Workspace selected: ${wsInfo.workspace}, transactorUrl: ${getTransactorUrl(wsInfo)}`)
+      log.debug(`Workspace selected: ${wsInfo.workspace}, transactorUrl: ${getTransactorUrl(wsInfo)}`)
     }
     let data: T
     if (handler.tx) {
@@ -67,7 +64,7 @@ async function apiCallRaw<T>(ctx: ApiContext, handler: ApiHandler<T>): Promise<A
     }
     return { ok: true, data }
   } catch (error: any) {
-    console.error('Api error:', error)
+    log.error('Api error:', error)
     const err = `${error}`
     if (err.includes('platform:status:Forbidden')) {
       return { ok: false, status: 403 }

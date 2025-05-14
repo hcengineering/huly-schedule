@@ -24,3 +24,4 @@ npm run start
 - `PORT` - an HTTP port the server listens to.
 - `SECRET` - a service secret uset to talk to Account service
 - `SMTP_URL` - address of Huly SMTP proxy used for sending meeting confirmation emails.
+- `LOG_LEVEL` - trace | debug | info | warn | error.

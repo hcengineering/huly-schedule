@@ -8,6 +8,7 @@ import ical, {
   ICalEventStatus,
   ICalEventTransparency
 } from 'ical-generator'
+import log from 'loglevel'
 import Mustache from 'mustache'
 import type { RestClient } from '@hcengineering/api-client'
 import calendar, { type Calendar, type Event, type Schedule } from '@hcengineering/calendar'
@@ -25,6 +26,8 @@ import { apiCall } from './api'
 import emailHtml from '../../emails/booked.html?raw'
 import emailText from '../../emails/booked.txt?raw'
 
+log.setLevel(process.env.LOG_LEVEL as any ?? 'info')
+
 function getAvatarName(name: string | null | undefined): string {
   if (name == null) {
     return ''
@@ -38,13 +41,13 @@ function getAvatarName(name: string | null | undefined): string {
 export async function makeContext(params: Record<string, string | undefined>): Promise<UIContext> {
   const workspaceUrl = params.workspace
   if (workspaceUrl === undefined) {
-    console.error('Missing workspace', workspaceUrl)
+    log.error('Missing workspace', workspaceUrl)
     throw { status: 400 }
   }
 
   const scheduleId = params.schedule
   if (scheduleId === undefined) {
-    console.error('Missing schedule', scheduleId)
+    log.error('Missing schedule', scheduleId)
     throw { status: 400 }
   }
 
@@ -63,7 +66,7 @@ export async function makeContext(params: Record<string, string | undefined>): P
         }
       }
     )
-    //console.log('SCHEDULE', schedule)
+    log.debug('SCHEDULE', schedule)
     if (schedule === undefined) {
       throw { status: 404, message: 'Schedule not found for ' + scheduleId }
     }
@@ -71,7 +74,7 @@ export async function makeContext(params: Record<string, string | undefined>): P
     const person = await client.findOne(contact.class.Person, {
       _id: schedule.owner
     })
-    //console.log('PERSON', person)
+    log.debug('PERSON', person)
     if (person === undefined) {
       throw { status: 404, message: 'Person not found for ' + schedule.owner }
     }
@@ -86,10 +89,10 @@ export async function makeContext(params: Record<string, string | undefined>): P
       },
       { projection: { _id: 1 } }
     )
-    //console.log('PERSON_SOCIAL_IDENTS', personSocialIdents)
+    log.debug('PERSON_SOCIAL_IDENTS', personSocialIdents)
 
     const personSocialIds = personSocialIdents.map((si) => si._id)
-    //console.log('PERSON_SOCIAL_IDS', personSocialIds)
+    log.debug('PERSON_SOCIAL_IDS', personSocialIds)
 
     const calendars = await client.findAll(
       calendar.class.Calendar,
@@ -101,13 +104,13 @@ export async function makeContext(params: Record<string, string | undefined>): P
         projection: { _id: 1 }
       }
     )
-    //console.log('ALL_CALENDARS', calendars)
+    log.debug('ALL_CALENDARS', calendars)
     if (calendars.length === 0) {
       throw { status: 404, message: 'Calendars not found for ' + person.personUuid }
     }
 
     const calendr = calendars.find((c) => c._id === (`${person.personUuid}_calendar` as Ref<Calendar>))
-    //console.log('PERSON_CALENDAR', calendr)
+    log.debug('PERSON_CALENDAR', calendr)
     if (calendr === undefined) {
       throw { status: 404, message: 'Calendar not found for ' + person.personUuid }
     }
@@ -153,7 +156,7 @@ export async function makeContext(params: Record<string, string | undefined>): P
             }
           : undefined
     }
-    //console.log('CONTEXT', context)
+    log.debug('CONTEXT', context)
 
     return context
   })
@@ -187,13 +190,13 @@ export async function getScheduleAndHost(
       } as any
     }
   )
-  //console.log('SCHEDULE', schedule)
+  log.debug('SCHEDULE', schedule)
   if (schedule === undefined) {
     throw { status: 404, message: 'Schedule not found for' + scheduleId }
   }
 
   const hostPerson = await client.findOne(contact.class.Person, { _id: schedule.owner })
-  //console.log('HOST_PERSON', hostPerson)
+  log.debug('HOST_PERSON', hostPerson)
   if (hostPerson === undefined) {
     throw { status: 404, message: 'Person not found for ' + schedule.owner }
   }
@@ -203,7 +206,7 @@ export async function getScheduleAndHost(
     attachedToClass: contact.class.Person,
     type: SocialIdType.EMAIL
   })
-  //console.log('HOST_SOCIAL_ID', hostSocialId)
+  log.debug('HOST_SOCIAL_ID', hostSocialId)
   if (hostSocialId === undefined) {
     throw { status: 404, message: 'Email not found for ' + schedule.owner }
   }
@@ -225,7 +228,7 @@ export async function getEventAndGuest(
     calendar: calendarId as Ref<Calendar>,
     eventId: eventId
   })
-  //console.log('EVENT', event)
+  log.debug('EVENT', event)
   if (event === undefined) {
     throw { status: 404, message: 'Event not found for ' + eventId }
   }
@@ -250,8 +253,8 @@ export async function getEventAndGuest(
     }
     participants.push({ person, email: socialId.value })
   }
-  //console.log('GUEST_PERSON', guestPerson)
-  //console.log('PARTICIPANTS', participants)
+  log.debug('GUEST_PERSON', guestPerson)
+  log.debug('PARTICIPANTS', participants)
   if (guestPerson === undefined) {
     throw { status: 404, message: 'Person not found for ' + guestEmail }
   }
@@ -381,7 +384,7 @@ export function prepareEmailTemplateParams(
 export async function sendEmail(to: string, params: EmailTemplateParams, ical: string): Promise<void> {
   try {
     if (!process.env.SMTP_URL) {
-      console.error('SMTP_URL is not defined')
+      log.error('SMTP_URL is not defined')
       return
     }
     const res = await fetch(concatLink(process.env.SMTP_URL, '/send'), {
@@ -405,11 +408,12 @@ export async function sendEmail(to: string, params: EmailTemplateParams, ical: s
       })
     })
     if (res.status !== 200) {
-      console.error(`Email sending failed to ${to}`, params.subject, res.statusText)
+      log.error(`Email sending failed to ${to}`, params.subject, res.statusText)
+    } else {
+      log.info(`Email sent to ${to}`, params.subject)
     }
-    console.log(`Email sent to ${to}`, params.subject)
   } catch (err) {
-    console.error(`Email sending failed to ${to}`, params.subject, err)
+    log.error(`Email sending failed to ${to}`, params.subject, err)
   }
 }
 

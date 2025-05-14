@@ -1,3 +1,4 @@
+import log from 'loglevel'
 import type {
   BookingInfo,
   BookingRequest,
@@ -33,7 +34,7 @@ export async function getTimeslots(context: UIContext, startDate: Date, periodDa
     body: JSON.stringify(req)
   })
   if (!response.ok) {
-    console.error('Failed to get timeslots:', response.status)
+    log.error('Failed to get timeslots:', response.status)
     return []
   }
 
@@ -84,9 +85,8 @@ export async function bookMeeting(
     },
     body: JSON.stringify(req)
   })
-  //console.log('status', response.status)
   if (!response.ok) {
-    //console.error('Failed to book meeting:', response.status)
+    log.error('Failed to book meeting:', response.status)
     if (response.status === 409) {
       return 'conflict'
     }
@@ -123,9 +123,8 @@ export async function cancelMeeting(
     },
     body: JSON.stringify(req)
   })
-  //console.log('status', response.status)
   if (!response.ok) {
-    //console.error('Failed to cancel meeting:', response.status)
+    log.error('Failed to cancel meeting:', response.status)
     if (response.status === 404) {
       return 'not-found'
     }
@@ -163,9 +162,8 @@ export async function rescheduleMeeting(
     },
     body: JSON.stringify(req)
   })
-  //console.log('status', response.status)
   if (!response.ok) {
-    //console.error('Failed to book meeting:', response.status)
+    log.error('Failed to book meeting:', response.status)
     if (response.status === 409) {
       return 'conflict'
     }
