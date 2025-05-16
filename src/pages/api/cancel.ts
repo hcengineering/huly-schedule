@@ -1,6 +1,7 @@
 import type { APIRoute, APIContext } from 'astro'
 import log from 'loglevel'
 import calendar from '@hcengineering/calendar'
+import core from '@hcengineering/core'
 import type { CancelRequest } from '../../scripts/types'
 import { apiCallTx } from '../../scripts/server/api'
 import {
@@ -28,7 +29,13 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
     )
 
     if (participants.length <= 2) {
-      await client.removeDoc(calendar.class.Event, calendar.space.Calendar, event._id, now.getTime(), hostSocialId._id)
+      await client.removeDoc(
+        calendar.class.Event,
+        calendar.space.Calendar,
+        event._id,
+        now.getTime(),
+        core.account.System,
+      )
     } else {
       await client.updateDoc(
         calendar.class.Event,
@@ -39,7 +46,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
         },
         false,
         now.getTime(),
-        hostSocialId._id
+        core.account.System,
       )
     }
 

@@ -10,7 +10,7 @@ import ical, {
 } from 'ical-generator'
 import log from 'loglevel'
 import Mustache from 'mustache'
-import type { AccountClient } from '@hcengineering/account-client'
+import { getClient as getAccountClient } from '@hcengineering/account-client'
 import type { RestClient } from '@hcengineering/api-client'
 import calendar, { type Calendar, type Event, type Schedule } from '@hcengineering/calendar'
 import contact, {
@@ -24,7 +24,7 @@ import contact, {
 import { AccountRole, concatLink, SocialIdType, type Projection, type Ref, type TxOperations } from '@hcengineering/core'
 import { loveId } from '@hcengineering/love'
 import type { Timestamp, UIContext } from '../types'
-import { apiCall } from './api'
+import { apiCall, selectWorkspace } from './api'
 import emailHtml from '../../emails/booked.html?raw'
 import emailText from '../../emails/booked.txt?raw'
 
@@ -492,20 +492,23 @@ function extractTextFromMarkup(text: string | undefined): string {
 }
 
 export async function getMeetingLinks({
-  accountClient,
   workspaceUrl,
-  eventObjectId,
+  personUuid,
+  eventRef,
   guestName,
   guestEmail,
   slotStart,
 }: {
-  accountClient: AccountClient,
   workspaceUrl: string,
-  eventObjectId: Ref<Event>,
+  personUuid?: string
+  eventRef: Ref<Event>,
   guestName: string,
   guestEmail: string,
   slotStart: Timestamp,
 }) : Promise<{ meetingLink: string, guestLink: string }> {
+  const wsInfo = await selectWorkspace({ workspaceUrl, personUuid })
+  const accountClient = getAccountClient(process.env.ACCOUNT_URL, wsInfo.token)
+
   let inviteExpHours = parseFloat(process.env.INVITE_EXPIRATION_HOURS ?? '1')
   if (isNaN(inviteExpHours) || inviteExpHours < 0) {
     inviteExpHours = 1
@@ -514,7 +517,7 @@ export async function getMeetingLinks({
   const navigateUrl = encodeURIComponent(
     JSON.stringify({
       path: ['workbench', workspaceUrl, loveId],
-      query: { meetId: eventObjectId }
+      query: { meetId: eventRef }
     })
   )
 
