@@ -35,8 +35,7 @@ function getTransactorUrl(wsInfo: WorkspaceLoginInfo): string {
   return wsInfo.endpoint.replace('ws://', 'http://').replace('wss://', 'https://')
 }
 
-async function apiCallRaw<T>(ctx: ApiContext, handler: ApiHandler<T>): Promise<ApiResult<T>> {
-  try {
+export async function selectWorkspace(ctx: ApiContext): Promise<WorkspaceLoginInfo>  {
     // TODO: clean cache and refresh token after some time
     const cacheKey = `${ctx.workspaceUrl}|${ctx.personUuid}`
     let wsInfo = cachedWorkspaces.get(cacheKey)
@@ -54,6 +53,12 @@ async function apiCallRaw<T>(ctx: ApiContext, handler: ApiHandler<T>): Promise<A
       cachedWorkspaces.set(cacheKey, wsInfo)
       log.debug(`Workspace selected: ${wsInfo.workspace}, transactorUrl: ${getTransactorUrl(wsInfo)}`)
     }
+    return wsInfo
+}
+
+async function apiCallRaw<T>(ctx: ApiContext, handler: ApiHandler<T>): Promise<ApiResult<T>> {
+  try {
+    let wsInfo = await selectWorkspace(ctx)
     let data: T
     if (handler.tx) {
       const client = await createRestTxOperations(getTransactorUrl(wsInfo), wsInfo.workspace, wsInfo.token)

@@ -2,6 +2,7 @@ import type { APIRoute, APIContext } from 'astro'
 import log from 'loglevel'
 import { type WorkspaceLoginInfo, getClient as getAccountClient } from '@hcengineering/account-client'
 import calendar, { type Calendar } from '@hcengineering/calendar'
+import core, { type Ref, type TxOperations } from '@hcengineering/core'
 import type { RescheduleRequest } from '../../scripts/types'
 import { apiCallTx } from '../../scripts/server/api'
 import {
@@ -13,7 +14,6 @@ import {
   sendEmail
 } from '../../scripts/server/utils'
 import { getTimezoneOffset, isSlotBusy, loadEvents } from './timeslots'
-import { type Ref, type TxOperations } from '@hcengineering/core'
 
 export const PUT: APIRoute = async ({ request }: APIContext) => {
   const req: RescheduleRequest = await request.json()
@@ -23,8 +23,8 @@ export const PUT: APIRoute = async ({ request }: APIContext) => {
   const now = new Date()
 
   const res = await apiCallTx(
-    { workspaceUrl, personUuid },
-    async (client: TxOperations, wsInfo: WorkspaceLoginInfo) => {
+    { workspaceUrl },
+    async (client: TxOperations) => {
       const { schedule, hostPerson, hostSocialId } = await getScheduleAndHost(client, req.scheduleId)
       const { event, guestPerson, participants } = await getEventAndGuest(
         client,
@@ -41,12 +41,10 @@ export const PUT: APIRoute = async ({ request }: APIContext) => {
         throw { status: 409, message: 'Slot is already busy' }
       }
 
-      const accountClient = getAccountClient(process.env.ACCOUNT_URL, wsInfo.token)
-
       const { meetingLink, guestLink } = await getMeetingLinks({
-        accountClient,
-        workspaceUrl: wsInfo.workspaceUrl,
-        eventObjectId: event._id,
+        workspaceUrl,
+        personUuid,
+        eventRef: event._id,
         guestName: guestPerson.name,
         guestEmail: req.guestEmail,
         slotStart,
@@ -63,7 +61,7 @@ export const PUT: APIRoute = async ({ request }: APIContext) => {
         },
         false,
         now.getTime(),
-        hostSocialId._id
+        core.account.System,
       )
 
       const updatedEvent = await client.findOne(calendar.class.Event, {

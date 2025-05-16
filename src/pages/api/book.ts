@@ -2,7 +2,7 @@ import type { APIRoute, APIContext } from 'astro'
 import log from 'loglevel'
 import { type WorkspaceLoginInfo, getClient as getAccountClient } from '@hcengineering/account-client'
 import calendar, { type Calendar, type Event, generateEventId } from '@hcengineering/calendar'
-import {
+import core, {
   type Ref,
   type TxOperations,
   SocialIdType,
@@ -30,7 +30,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
   const now = new Date()
 
   const res = await apiCallTx(
-    { workspaceUrl, personUuid },
+    { workspaceUrl },
     async (client: TxOperations, wsInfo: WorkspaceLoginInfo) => {
       const { schedule, hostPerson, hostSocialId } = await getScheduleAndHost(client, req.scheduleId)
 
@@ -122,12 +122,12 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
       }
 
       const eventId = generateEventId()
-      const eventObjectId = generateId() as Ref<Event>
+      const eventRef = generateId() as Ref<Event>
 
       const { meetingLink, guestLink } = await getMeetingLinks({
-        accountClient,
-        workspaceUrl: wsInfo.workspaceUrl,
-        eventObjectId,
+        workspaceUrl,
+        personUuid,
+        eventRef,
         guestName: guestPerson.name,
         guestEmail: req.booking.email,
         slotStart,
@@ -154,11 +154,9 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
           access: 'owner',
           user: hostSocialId._id
         },
-        eventObjectId,
+        eventRef,
         now.getTime(),
-        // onEventCreate in service triggers checks if the event was not created by one of its participants
-        // and adds another event for that who created the original event. So createdBy should be the host
-        hostSocialId._id
+        core.account.System,
       )
 
       let event: Event | undefined
@@ -167,7 +165,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
         // in all calendars
       })
       for (const e of newEvents) {
-        if (e._id === eventObjectId) {
+        if (e._id === eventRef) {
           event = e
         }
         await client.createMixin(
@@ -179,7 +177,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
             room: meetingRoomId
           },
           now.getTime(),
-          hostSocialId._id
+          core.account.System,
         )
       }
       if (event === undefined) {
