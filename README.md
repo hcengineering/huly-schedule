@@ -18,6 +18,18 @@ npm run start
 
 `astro dev` does not work because of external modules published in CommonJS format. `astro dev` likes ESM and does not understant CommonJS properly. So the hot-reload feature is not available as well.
 
+## Deployment
+
+Build docker container and tag it with a desired version (it could be any tag, will be updated anyway):
+
+```
+npm run build:docker
+docker tag service_huly-schedule hardcoreeng/service_huly-schedule:v0.0.5
+docker push hardcoreeng/service_huly-schedule:v0.0.5
+```
+
+The image should have the `service_` prefix to mark it as "internal". Then update the version tag in the [platform](https://github.com/hcengineering/platform/tree/develop/pods/external/services.d). The sevice will be automatically pulled, retagged with the lates platform version, and deployed on the cluster.
+
 ## Configuration
 
 - `ACCOUNT_URL` - address of Huly Account service.

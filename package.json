@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "build": "astro build",
-    "build:docker": "docker build -t huly-schedule .",
+    "build:docker": "docker build -t service_huly-schedule .",
     "start": "astro build && PORT=8060 FRONT_URL=http://huly.local:8080 ACCOUNT_URL=http://huly.local:3000 SMTP_URL=http://huly.local:8097 LOG_LEVEL=trace node ./dist/server/entry.mjs",
     "astro": "astro"
   },
