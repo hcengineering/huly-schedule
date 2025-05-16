@@ -20,15 +20,14 @@ npm run start
 
 ## Deployment
 
-Build docker container and tag it with a desired version (it could be any tag, will be updated anyway):
+Add and push a version tag:
 
 ```
-npm run build:docker
-docker tag service_huly-schedule hardcoreeng/service_huly-schedule:v0.0.5
-docker push hardcoreeng/service_huly-schedule:v0.0.5
+git tag -a v0.0.5
+git push origin v0.0.5
 ```
 
-The image should have the `service_` prefix to mark it as "internal". Then update the version tag in the [platform](https://github.com/hcengineering/platform/tree/develop/pods/external/services.d). The sevice will be automatically pulled, retagged with the lates platform version, and deployed on the cluster.
+Build should start on GitHub automatically. Target image has the `service_` prefix to mark it as "internal". Then update the version tag in the [platform](https://github.com/hcengineering/platform/tree/develop/pods/external/services.d). The sevice will be automatically pulled, retagged with the lates platform version, and deployed on the cluster.
 
 ## Configuration
 
