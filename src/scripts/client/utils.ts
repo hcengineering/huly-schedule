@@ -5,16 +5,20 @@ export function formatLocalTimezone(): string {
     return ''
   }
   const date = new Date()
-  let offset = date.toLocaleDateString(navigator.language, { timeZoneName: 'short' })
-  let tzName = date.toLocaleDateString(navigator.language, { timeZoneName: 'long' })
-  for (let i = 0; i < offset.length; i++) {
-    if (offset[i] !== tzName[i]) {
-      offset = offset.substring(i)
-      tzName = tzName.substring(i)
-      break
-    }
-  }
-  return `(${offset}) ${tzName}`
+
+  // Get timezone offset in minutes and convert to hours
+  const offsetInMinutes = date.getTimezoneOffset()
+  const offsetHours = Math.abs(Math.floor(offsetInMinutes / 60))
+  const offsetMinutes = Math.abs(offsetInMinutes % 60)
+
+  // Format the offset string
+  const sign = offsetInMinutes <= 0 ? '+' : '-'
+  const offsetStr = `GMT${sign}${offsetHours}${offsetMinutes > 0 ? ':' + offsetMinutes.toString().padStart(2, '0') : ''}`
+
+  // Get the long timezone name
+  const tzName = new Intl.DateTimeFormat(navigator.language, { timeZoneName: 'long' }).formatToParts(date).find(part => part.type === 'timeZoneName')?.value || ''
+
+  return `(${offsetStr}) ${tzName}`
 }
 
 export function sameDate(date1: Date | undefined, date2: Date | undefined): boolean {
