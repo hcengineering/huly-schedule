@@ -44,6 +44,7 @@ export async function loadEvents(
     calendar.class.Event,
     {
       calendar: { $in: calendarIds as Ref<Calendar>[] },
+      blockTime: true,
       date: { $gt: periodStart - 86_400_000, $lte: periodEnd }
     },
     options
@@ -51,6 +52,7 @@ export async function loadEvents(
   const events2 = await client.findAll(
     calendar.class.ReccuringEvent,
     {
+      blockTime: true,
       calendar: { $in: calendarIds as Ref<Calendar>[] }
     },
     options
