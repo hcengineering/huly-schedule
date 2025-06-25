@@ -144,6 +144,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
           eventId,
           date: slotStart,
           dueDate: slotEnd,
+          blockTime: true,
           title: `${schedule.title} (${formatName(guestPerson.name, process.env.LAST_NAME_FIRST)})`,
           description: req.booking.subject,
           location: meetingLink,
