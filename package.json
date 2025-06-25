@@ -5,17 +5,17 @@
   "scripts": {
     "build": "astro build",
     "build:docker": "docker build -t service_huly-schedule .",
-    "start": "astro build && PORT=8060 FRONT_URL=http://huly.local:8080 ACCOUNT_URL=http://huly.local:3000 SMTP_URL=http://huly.local:8097 LOG_LEVEL=trace node ./dist/server/entry.mjs",
+    "start": "astro build && PORT=8060 FRONT_URL=https://front.hc.engineering ACCOUNT_URL=https://account.hc.engineering SMTP_URL=http://huly.local:8097 LOG_LEVEL=trace node ./dist/server/entry.mjs",
     "astro": "astro"
   },
   "dependencies": {
     "@astrojs/node": "^9.2.1",
     "@astrojs/svelte": "^7.0.11",
-    "@hcengineering/account-client": "^0.7.144",
+    "@hcengineering/account-client": "^0.7.145",
     "@hcengineering/api-client": "^0.7.88",
     "@hcengineering/calendar": "^0.7.145",
-    "@hcengineering/contact": "^0.7.144",
-    "@hcengineering/love": "^0.7.144",
+    "@hcengineering/contact": "^0.7.145",
+    "@hcengineering/love": "^0.7.145",
     "astro": "^5.7.5",
     "ical-generator": "^8.1.1",
     "jwt-simple": "^0.5.6",
