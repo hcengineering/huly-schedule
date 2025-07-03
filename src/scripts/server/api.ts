@@ -9,27 +9,31 @@ interface ApiContext {
   personUuid?: string
 }
 
-type ApiResult<T> =
-  | {
-      ok: true
-      data: T
-    }
-  | {
-      ok: false
-      status: number
-    }
+export interface SuccessResult<T> {
+  ok: true
+  data: T
+}
+
+export interface ErrorResult {
+  ok: false
+  status: number
+}
+
+type ApiResult<T> = SuccessResult<T> | ErrorResult
 
 const cachedWorkspaces = new Map<string, WorkspaceLoginInfo>()
 
-type ApiHandler<T> =
-  | {
+interface ClientHandler<T> {
       tx: false
       method: (client: RestClient, wsInfo: WorkspaceLoginInfo) => Promise<T>
     }
-  | {
+
+interface TxHandler<T> {
       tx: true
       method: (client: TxOperations, wsInfo: WorkspaceLoginInfo) => Promise<T>
     }
+
+type ApiHandler<T> = ClientHandler<T> | TxHandler<T>
 
 function getTransactorUrl(wsInfo: WorkspaceLoginInfo): string {
   return wsInfo.endpoint.replace('ws://', 'http://').replace('wss://', 'https://')
@@ -65,7 +69,7 @@ async function apiCallRaw<T>(ctx: ApiContext, handler: ApiHandler<T>): Promise<A
       data = await handler.method(client, wsInfo)
     } else {
       const client = createRestClient(getTransactorUrl(wsInfo), wsInfo.workspace, wsInfo.token)
-      data = await handler.method(client, wsInfo)
+      data = await (handler as ClientHandler<T>).method(client, wsInfo)
     }
     return { ok: true, data }
   } catch (error: any) {

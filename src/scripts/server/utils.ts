@@ -24,7 +24,7 @@ import contact, {
 import { AccountRole, concatLink, SocialIdType, type Projection, type Ref, type TxOperations } from '@hcengineering/core'
 import { loveId } from '@hcengineering/love'
 import type { Timestamp, UIContext } from '../types'
-import { apiCall, selectWorkspace } from './api'
+import { apiCall, ErrorResult, selectWorkspace } from './api'
 import emailHtml from '../../emails/booked.html?raw'
 import emailText from '../../emails/booked.txt?raw'
 
@@ -164,7 +164,7 @@ export async function makeContext(params: Record<string, string | undefined>): P
   })
 
   if (!res.ok) {
-    throw { status: res.status }
+    throw { status: (res as ErrorResult).status }
   }
   return res.data
 }
@@ -443,7 +443,7 @@ function formatTimeslotLong(event: Event, timeZone: string, locale: string): str
     }
   }
 
-  return `${dtFormatter.formatRange(event.date, event.dueDate)} ${tzName}`
+  return `${dtFormatter.format(event.date)} - ${dtFormatter.format(event.dueDate)} ${tzName}`
 }
 
 function formatTimeslotShort(event: Event, timeZone: string, locale: string): string {
@@ -461,7 +461,7 @@ function formatTimeslotShort(event: Event, timeZone: string, locale: string): st
   const parts = tzFormatter.formatToParts(event.date)
   let tzName = parts.find((p) => p.type === 'timeZoneName')?.value || ''
 
-  return `${dtFormatter.formatRange(event.date, event.dueDate)} ${tzName}`
+  return `${dtFormatter.format(event.date)} - ${dtFormatter.format(event.dueDate)} ${tzName}`
 }
 
 function extractTextFromMarkup(text: string | undefined): string {

@@ -1,7 +1,6 @@
-import type { APIRoute, APIContext } from 'astro'
-import log from 'loglevel'
 import { type WorkspaceLoginInfo, getClient as getAccountClient } from '@hcengineering/account-client'
-import calendar, { type Calendar, type Event, generateEventId } from '@hcengineering/calendar'
+import calendar, { type Calendar, type Event, AccessLevel, generateEventId } from '@hcengineering/calendar'
+import contact, { type SocialIdentityRef, AvatarType, combineName, formatName } from '@hcengineering/contact'
 import core, {
   type Ref,
   type TxOperations,
@@ -9,11 +8,10 @@ import core, {
   buildSocialIdString,
   generateId
 } from '@hcengineering/core'
-import contact, { type SocialIdentityRef, AvatarType, combineName, formatName } from '@hcengineering/contact'
 import love from '@hcengineering/love'
-import type { BookingRequest } from '../../scripts/types'
-import { apiCallTx } from '../../scripts/server/api'
-import { loadEvents, isSlotBusy, getTimezoneOffset } from './timeslots'
+import type { APIContext, APIRoute } from 'astro'
+import log from 'loglevel'
+import { apiCallTx, ErrorResult } from '../../scripts/server/api'
 import {
   getMeetingLinks,
   getScheduleAndHost,
@@ -21,6 +19,8 @@ import {
   prepareEmailTemplateParams,
   sendEmail
 } from '../../scripts/server/utils'
+import type { BookingRequest } from '../../scripts/types'
+import { getTimezoneOffset, isSlotBusy, loadEvents } from './timeslots'
 
 export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
   const req: BookingRequest = await request.json()
@@ -152,7 +152,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
           participants: [hostPerson._id, guestPerson._id],
           allDay: false,
           timeZone: req.timeZone,
-          access: 'owner',
+          access: AccessLevel.Owner,
           user: hostSocialId._id
         },
         eventRef,
@@ -224,8 +224,8 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
   )
   if (!res.ok) {
     log.error('Error while booking meeting', req, res)
-    return new Response(JSON.stringify({ error: res.status }), {
-      status: res.status,
+    return new Response(JSON.stringify({ error: (res as ErrorResult).status }), {
+      status: (res as ErrorResult).status,
       headers: { 'Content-Type': 'application/json' }
     })
   }
