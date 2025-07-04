@@ -11,7 +11,7 @@ import core, {
 import love from '@hcengineering/love'
 import type { APIContext, APIRoute } from 'astro'
 import log from 'loglevel'
-import { apiCallTx, ErrorResult } from '../../scripts/server/api'
+import { apiCallTx, type ErrorResult } from '../../scripts/server/api'
 import {
   getMeetingLinks,
   getScheduleAndHost,

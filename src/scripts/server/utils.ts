@@ -24,7 +24,7 @@ import contact, {
 import { AccountRole, concatLink, SocialIdType, type Projection, type Ref, type TxOperations } from '@hcengineering/core'
 import { loveId } from '@hcengineering/love'
 import type { Timestamp, UIContext } from '../types'
-import { apiCall, ErrorResult, selectWorkspace } from './api'
+import { apiCall, type ErrorResult, selectWorkspace } from './api'
 import emailHtml from '../../emails/booked.html?raw'
 import emailText from '../../emails/booked.txt?raw'
 
