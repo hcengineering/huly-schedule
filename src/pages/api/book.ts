@@ -59,7 +59,7 @@ export const PUT: APIRoute = async ({ locals, request }: APIContext) => {
           avatarType: AvatarType.COLOR,
           name: combineName(req.booking.firstName, req.booking.lastName),
           personUuid: guestPersonUuid
-        })
+        }, undefined, undefined, core.account.System)
         guestPerson = await client.findOne(contact.class.Person, { _id: guestPersonId })
         log.debug('GUEST_PERSON_NEW', guestPerson)
         if (guestPerson === undefined) {
